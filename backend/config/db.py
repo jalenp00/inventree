@@ -17,8 +17,6 @@ SessionLocal = async_sessionmaker(
 )
 
 class Base(DeclarativeBase):
-    class Config:
-        from_attributes = True
     pass
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

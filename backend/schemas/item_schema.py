@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 from typing import Literal
 from decimal import Decimal
+from config.schema import SchemaBase
 
-
-class ItemIn(BaseModel):
+class ItemIn(SchemaBase):
     sku: str
     uom: Literal["ea","lbs"]
     cost: Decimal
@@ -11,7 +11,7 @@ class ItemIn(BaseModel):
     description: str
     details: str
 
-class ItemOut(BaseModel):
+class ItemOut(SchemaBase):
     id: int
     sku: str
     uom: Literal["ea","lbs"]
@@ -19,7 +19,3 @@ class ItemOut(BaseModel):
     type: Literal["product", "part", "raw"]
     description: str
     details: str
-
-
-    class Config:
-        from_attributes = True
