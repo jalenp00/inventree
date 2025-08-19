@@ -1,0 +1,7 @@
+# --- core app ---
+fastapi
+uvicorn[standard]
+
+# --- database ---
+SQLAlchemy>=2.0
+asyncpg
