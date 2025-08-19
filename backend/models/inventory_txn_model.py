@@ -39,6 +39,10 @@ class InventoryTransaction(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
+    on_hand: Mapped[Numeric] = mapped_column(
+        Numeric(18, 6), nullable=False, server_default="0"
+    )
+
     __table_args__ = (
         CheckConstraint("qty > 0", name="inv_txn_qty_pos"),
         Index("idx_inv_txn_type", "txn_type"),

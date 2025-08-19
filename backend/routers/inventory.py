@@ -23,7 +23,10 @@ async def adjust_inventory(payload:InventoryAdjustment, db: AsyncSession = Depen
         db.add(inv)
         await db.flush()
     
-    txn = InventoryTransaction(**payload.model_dump())
+    data = payload.model_dump()
+    data["on_hand"] = inv.on_hand + payload.qty
+
+    txn = InventoryTransaction(**data)
 
     db.add(txn)
     await db.commit()

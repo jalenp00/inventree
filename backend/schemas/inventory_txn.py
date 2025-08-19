@@ -10,3 +10,4 @@ class InventoryTxnOut(SchemaBase):
     txn_type: TxnType
     reference: str | None
     created_at: datetime
+    on_hand: float
