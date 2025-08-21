@@ -5,18 +5,25 @@ from sqlalchemy import select
 from config.db import get_session
 from models.item_model import Item
 from schemas.item_schema import ItemIn, ItemOut
+from services.inventory_service import InventoryService
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 @router.post("/", response_model=ItemOut, status_code=status.HTTP_201_CREATED)
 async def create_item(payload: ItemIn, db: AsyncSession = Depends(get_session)):
     exists = await db.execute(select(Item).where(Item.sku == payload.sku))
+
     if exists.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Item with that SKU already exists.")
+    
     item = Item(**payload.model_dump())
     db.add(item)
     await db.commit()
     await db.refresh(item)
+
+    service = InventoryService(db) # Maybe not the best spot?
+    await service.check_and_create(item.id)
+
     return item
 
 @router.get("/", response_model=list[ItemOut])
@@ -31,14 +38,14 @@ async def get_item(item_id: int, db: AsyncSession = Depends(get_session)):
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
+'''
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_item(item_id: int, db: AsyncSession = Depends(get_session)):
-    res = await db.execute(select(models.Item).where(models.Item.id == item_id))
+    res = await db.execute(select(Item).where(Item.id == item_id))
     item = res.scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     await db.delete(item)
     await db.commit()
-    return None
-'''
+    return {"details": "Item deleted successfully"}

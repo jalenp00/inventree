@@ -20,6 +20,7 @@ class InventoryOut(SchemaBase):
     incoming: Qty
     backordered: Qty # COMPUTED: allocated - on_hand (can be negative)
     available: Qty  # COMPUTED: on_hand - allocated (can be negative)
+    available_to_build: Qty | None = None
 
 class InventoryAdjustment(SchemaBase):
     item_id: int

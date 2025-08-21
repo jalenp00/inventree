@@ -16,7 +16,7 @@ class Bom(Base):
     child_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("items.id", ondelete="RESTRICT"), primary_key=True
     )
-    quantity:   Mapped[float] = mapped_column(Numeric(18,6), nullable=False)
+    qty:   Mapped[float] = mapped_column(Numeric(18,6), nullable=False)
     uom:       Mapped[str]   = mapped_column(Text, nullable=False, default="ea")
 
     parent = relationship("Item", foreign_keys=[parent_id], back_populates="bom_children")

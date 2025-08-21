@@ -9,28 +9,14 @@ from config.schema import SchemaBase
 Qty = Annotated[Decimal, Field(ge=0, max_digits=18, decimal_places=6)]
 
 # BOM LINE
-class BOMLineIn(SchemaBase):
+class BomLineBase(SchemaBase):
     child_id: int
-    quantity: Qty
+    qty: Qty
     uom: str = "ea"
 
-# BOM Line
-class BOMLineOut(SchemaBase):
-    child_id: int
-    quantity: Qty
-    uom: str
+class BomLineIn(BomLineBase):
+    pass
 
-# BOM with all lines
-class BOMReplaceIn(SchemaBase):
+class BomLineOut(BomLineBase):
     parent_id: int
-    lines: list[BOMLineIn]
-
-# Bom with all lines
-class BOMOut(SchemaBase):
-    child_id: int
-    quantity: Qty
-    uom: str
-
-# Bulk payloads
-class BOMReplaceBulkIn(SchemaBase):
-    boms: list[BOMReplaceIn]
+    

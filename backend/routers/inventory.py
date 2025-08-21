@@ -7,21 +7,18 @@ from models.inventory_txn_model import InventoryTransaction
 from models.inventory_model import Inventory
 from schemas.inventory_schema import InventoryOut, InventoryAdjustment
 from schemas.inventory_txn import InventoryTxnOut
+from queries.inventory_q import InventoryQ
+from services.inventory_service import InventoryService
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
+
 @router.post("/adjust", response_model=InventoryOut)
-async def adjust_inventory(payload:InventoryAdjustment, db: AsyncSession = Depends(get_session)):
+async def adjust_inventory(payload: InventoryAdjustment, db: AsyncSession = Depends(get_session)):
 
-    result = await db.execute(
-        select(Inventory).where(Inventory.item_id == payload.item_id)
-    )
-    inv: Inventory | None = result.scalar_one_or_none()
-
-    if not inv:
-        inv = Inventory(item_id=payload.item_id)
-        db.add(inv)
-        await db.flush()
+    service = InventoryService(db) # Maybe not the best spot?
+    
+    inv = await service.check_and_create(payload.item_id)
     
     data = payload.model_dump()
     data["on_hand"] = inv.on_hand + payload.qty
@@ -35,7 +32,7 @@ async def adjust_inventory(payload:InventoryAdjustment, db: AsyncSession = Depen
     return InventoryOut.model_validate(inv)
 
 @router.get("/transactions/{item_id}", response_model=list[InventoryTxnOut])
-async def get_all_txns(item_id:int, db: AsyncSession = Depends(get_session)):
+async def get_all_txns(item_id: int, db: AsyncSession = Depends(get_session)):
 
     result = await db.execute(select(InventoryTransaction)
                               .where(InventoryTransaction.item_id == item_id)
@@ -59,5 +56,11 @@ async def get_inventory(item_id: int, db: AsyncSession = Depends(get_session)):
     if not inv:
         raise HTTPException(status_code=404, detail="No inventory levels do not exist for this part.")
     
-    return InventoryOut.model_validate(inv)
+    avail_result = await db.execute(InventoryQ.get_available_to_build, {"item_id": item_id})
+    available = avail_result.scalar()
+
+    inv_out = InventoryOut.model_validate(inv)
+    inv_out.available_to_build = available
+    
+    return inv_out
     
