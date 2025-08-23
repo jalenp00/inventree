@@ -5,4 +5,4 @@
     -   source .venv/bin/activate
 
 # Run Backend
--   uvicorn backend.main:app --reload
+-   uvicorn main:app --reload

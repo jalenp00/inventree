@@ -1,6 +1,6 @@
 from __future__ import annotations
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Optional
 from pydantic import Field
 from enum import Enum
 from type_defs.txn_type import TxnType
@@ -15,11 +15,14 @@ class AdjustType(str, Enum):
 
 class InventoryOut(SchemaBase):
     item_id: int
+    sku: str
     on_hand: Qty
     allocated: Qty
     incoming: Qty
+    reorder_point: Optional[Qty] = None
+    reorder_to: Optional[Qty] = None
     backordered: Qty # COMPUTED: allocated - on_hand (can be negative)
-    available: Qty  # COMPUTED: on_hand - allocated (can be negative)
+    available: Optional[Qty] = None  # COMPUTED: on_hand - allocated (can be negative)
     available_to_build: Qty | None = None
 
 class InventoryAdjustment(SchemaBase):

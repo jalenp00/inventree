@@ -25,7 +25,9 @@ class Inventory(Base):
     allocated:   Mapped[Numeric] = mapped_column(Numeric(18, 6), nullable=False, server_default="0")
     incoming:    Mapped[Numeric] = mapped_column(Numeric(18, 6), nullable=False, server_default="0")
     backordered: Mapped[Numeric] = mapped_column(Numeric(18, 6), nullable=False, server_default="0")
-
+    reorder_point: Mapped[Numeric] = mapped_column(Numeric(18, 6), nullable=True)
+    reorder_point: Mapped[Numeric] = mapped_column(Numeric(18, 6), nullable=True)
+    
     # Read-only computed field (compiled into SQL as (on_hand - allocated))
     available = column_property(on_hand - allocated)
 

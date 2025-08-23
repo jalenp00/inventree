@@ -7,6 +7,18 @@ from schemas.bom_schema import BomLineIn, BomLineOut
 
 router = APIRouter(prefix="/boms", tags=["boms"])
 
+# Get Child BOMs
+@router.get("/child/{item_id}", response_model=list[BomLineOut])
+async def list_child_boms(item_id: int, db: AsyncSession = Depends(get_session)):
+    res = await db.execute(select(Bom).where(Bom.parent_id == item_id).order_by(Bom.child_id))
+    return res.scalars().all()
+
+# Get Parent BOMs
+@router.get("/parent/{item_id}", response_model=list[BomLineOut])
+async def list_parent_boms(item_id: int, db: AsyncSession = Depends(get_session)):
+    res = await db.execute(select(Bom).where(Bom.child_id == item_id).order_by(Bom.parent_id))
+    return res.scalars().all()
+
 # Create Bom
 @router.post("/{item_id}", response_model=BomLineOut, status_code=status.HTTP_201_CREATED)
 async def create_bomline(item_id: int, payload: BomLineIn, db: AsyncSession = Depends(get_session)):
@@ -19,18 +31,6 @@ async def create_bomline(item_id: int, payload: BomLineIn, db: AsyncSession = De
     await db.commit()
     await db.refresh(bom)
     return bom
-
-# Get Child BOMs
-@router.get("/child/{item_id}", response_model=list[BomLineOut])
-async def list_child_boms(item_id: int, db: AsyncSession = Depends(get_session)):
-    res = await db.execute(select(Bom).where(Bom.parent_id == item_id).order_by(Bom.child_id))
-    return res.scalars().all()
-
-# Get Parent BOMs
-@router.get("/parent/{item_id}", response_model=list[BomLineOut])
-async def list_parent_boms(item_id: int, db: AsyncSession = Depends(get_session)):
-    res = await db.execute(select(Bom).where(Bom.child_id == item_id).order_by(Bom.parent_id))
-    return res.scalars().all()
 
 # Edit Bom
 @router.patch("/{item_id}", response_model=BomLineOut)
